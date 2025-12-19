@@ -5,7 +5,7 @@ import java.io.*;
 /**
  * A BitOutputStream allows bit-by-bit writing to a file.
  */
-public class BitOutputStream {
+public class BitOutputStream implements AutoCloseable {
     private PrintStream output;
     private int digits;     // a buffer used to build up next set of digits
     private int cursor;     // our current position in the buffer.
@@ -60,7 +60,7 @@ public class BitOutputStream {
      * @param n the number of bits to write from the integer
      */
     public void writeBits(int bits, int n) {
-        for (int i = n-1; i >= 0; i--) {
+        for (int i = n - 1; i >= 0; i--) {
             writeBit((bits >>> i) % 2);
         }
     }
@@ -80,14 +80,11 @@ public class BitOutputStream {
     }
 
     /** Closes the stream, flushing any remaining bits to the file */
+    @Override
     public void close() {
         if (cursor >= 0) {
             flush();
         }
         output.close();
-    }
-
-    protected void finalize() {
-        close();
     }
 }

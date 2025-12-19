@@ -5,7 +5,7 @@ import java.io.*;
 /**
  * A BitInputStream reads a file bit-by-bit.
  */
-public class BitInputStream {
+public class BitInputStream implements AutoCloseable {
     private FileInputStream input;
     private int digits;     // next set of digits (buffer)
     private int cursor;     // how many digits from buffer have been used
@@ -22,7 +22,9 @@ public class BitInputStream {
     }
 
     /** @return true iff the stream has bits left to produce */
-    public boolean hasBits() { return digits != -1; }
+    public boolean hasBits() {
+        return digits != -1;
+    }
 
     /**
      * Reads a bit from the stream in big-endian order (msb first)
@@ -31,10 +33,14 @@ public class BitInputStream {
      **/
     public int readBit() {
         // if at eof, return -1
-        if (digits == -1) { return -1; }
+        if (digits == -1) {
+            return -1;
+        }
         int result = (digits & (1 << cursor)) >> cursor;
         cursor--;
-        if (cursor < 0) { nextByte(); }
+        if (cursor < 0) {
+            nextByte();
+        }
         return result;
     }
 
@@ -48,7 +54,9 @@ public class BitInputStream {
         int ret = 0;
         for (int i = n - 1; i >= 0; i--) {
             int bit = readBit();
-            if (bit == -1) { return -1; }
+            if (bit == -1) {
+                return -1;
+            }
             ret = ret | (bit << i);
         }
         return ret;
@@ -65,15 +73,12 @@ public class BitInputStream {
     }
 
     /** Closes the stream, flushing any remaining bits to the file. */
+    @Override
     public void close() {
         try {
             input.close();
         } catch (IOException e) {
             throw new RuntimeException(e.toString());
         }
-    }
-
-    protected void finalize() {
-        close();
     }
 }
